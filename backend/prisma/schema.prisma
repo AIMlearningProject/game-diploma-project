@@ -1,0 +1,230 @@
+// Lukudiplomi Game - Database Schema
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  ADMIN
+}
+
+enum OAuthProvider {
+  GOOGLE
+  MICROSOFT
+  LOCAL
+}
+
+model User {
+  id              String        @id @default(uuid())
+  name            String
+  email           String        @unique
+  password        String?       // Only for LOCAL auth
+  role            UserRole
+  schoolId        String?
+  oauthProvider   OAuthProvider @default(LOCAL)
+  oauthId         String?
+  profilePicture  String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  // Relations
+  school          School?         @relation(fields: [schoolId], references: [id])
+  studentProfile  StudentProfile?
+  teacherClasses  Class[]
+  readingLogs     ReadingLog[]
+  auditLogs       AuditLog[]
+  gameState       GameState?
+
+  @@index([email])
+  @@index([schoolId])
+}
+
+model School {
+  id        String   @id @default(uuid())
+  name      String
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  users   User[]
+  classes Class[]
+}
+
+model Class {
+  id         String   @id @default(uuid())
+  schoolId   String
+  teacherId  String
+  name       String
+  gradeLevel Int
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relations
+  school   School            @relation(fields: [schoolId], references: [id])
+  teacher  User              @relation(fields: [teacherId], references: [id])
+  students StudentProfile[]
+  challenges ClassChallenge[]
+
+  @@index([schoolId])
+  @@index([teacherId])
+}
+
+model StudentProfile {
+  id           String   @id @default(uuid())
+  studentId    String   @unique
+  classId      String
+  avatar       String?
+  gradeLevel   Int
+  readingGoal  Int      @default(10) // Books per term
+  lastActive   DateTime @default(now())
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  student User  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  class   Class @relation(fields: [classId], references: [id])
+
+  @@index([studentId])
+  @@index([classId])
+}
+
+model Book {
+  id                 String   @id @default(uuid())
+  title              String
+  author             String
+  isbn               String?  @unique
+  pages              Int
+  genre              String
+  difficultyScore    Float    @default(1.0) // 0.5 (easy) to 3.0 (hard)
+  recommendedAgeMin  Int
+  recommendedAgeMax  Int
+  coverImage         String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relations
+  readingLogs ReadingLog[]
+
+  @@index([genre])
+  @@index([difficultyScore])
+}
+
+model ReadingLog {
+  id                 String    @id @default(uuid())
+  studentId          String
+  bookId             String
+  startDate          DateTime  @default(now())
+  finishDate         DateTime?
+  reviewText         String?
+  pagesRead          Int
+  verifiedByTeacher  Boolean   @default(false)
+  teacherVerifiedAt  DateTime?
+  pointsAwarded      Int       @default(0)
+  stepsAwarded       Int       @default(0)
+  metadataHash       String?   // For tamper detection
+  flagged            Boolean   @default(false)
+  flagReason         String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relations
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  book    Book @relation(fields: [bookId], references: [id])
+
+  @@index([studentId])
+  @@index([bookId])
+  @@index([verifiedByTeacher])
+  @@index([createdAt])
+}
+
+model GameState {
+  id                    String   @id @default(uuid())
+  studentId             String   @unique
+  boardPosition         Int      @default(0)
+  currentBoardVersion   String   @default("1.0")
+  unlockedAchievements  String[] // Array of achievement IDs
+  streak                Int      @default(0)
+  longestStreak         Int      @default(0)
+  xp                    Int      @default(0)
+  level                 Int      @default(1)
+  lastBookLoggedAt      DateTime?
+  lastUpdate            DateTime @default(now())
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  // Relations
+  student User @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}
+
+model Achievement {
+  id           String   @id @default(uuid())
+  key          String   @unique // e.g., "fast_reader", "genre_explorer"
+  name         String
+  description  String
+  icon         String
+  criteriaJson String   // JSON storing achievement criteria
+  points       Int      @default(10)
+  tier         String   @default("bronze") // bronze, silver, gold, platinum
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([key])
+}
+
+model ClassChallenge {
+  id          String    @id @default(uuid())
+  classId     String
+  name        String
+  description String
+  targetBooks Int       @default(5)
+  startDate   DateTime
+  endDate     DateTime
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  // Relations
+  class Class @relation(fields: [classId], references: [id], onDelete: Cascade)
+
+  @@index([classId])
+  @@index([isActive])
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  actorId      String
+  action       String   // e.g., "VERIFY_LOG", "UPDATE_STUDENT", "DELETE_BOOK"
+  target       String   // e.g., "ReadingLog:uuid", "User:uuid"
+  metadataJson String?  // JSON with additional context
+  createdAt    DateTime @default(now())
+
+  // Relations
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model BoardConfig {
+  id          String   @id @default(uuid())
+  version     String   @unique
+  configJson  String   // JSON storing board layout, tiles, rules
+  minAge      Int      @default(6)
+  maxAge      Int      @default(18)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([version])
+  @@index([isActive])
+}
