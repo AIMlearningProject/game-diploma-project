@@ -1,3 +1,5 @@
+This project is part of the AIMlearning project, which is co-funded by the European Union. The project will run from 1.2.2024 to 30.4.2027.
+
 # Lukudiplomi - Reading Diploma Game
 
 A browser-based adaptive board game platform where students' reading activity drives game progression and teachers receive actionable monitoring tools.

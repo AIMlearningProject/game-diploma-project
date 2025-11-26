@@ -22,29 +22,29 @@ function GamePage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="mb-6 text-center">Your Reading Journey</h1>
+      <h1 className="mb-6 text-center">Lukumatkasi</h1>
 
       <div id="game-container" ref={gameRef}></div>
 
       <div className="card mt-6">
-        <h3 className="mb-3">Game Controls</h3>
+        <h3 className="mb-3">Pelin ohjeet</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <p className="font-medium">Movement</p>
+            <p className="font-medium">Liikkuminen</p>
             <p className="text-sm text-gray-600">
-              Your character moves automatically as you log books
+              Hahmosi liikkuu automaattisesti kun kirjaat kirjoja
             </p>
           </div>
           <div>
-            <p className="font-medium">Tiles</p>
+            <p className="font-medium">Ruudut</p>
             <p className="text-sm text-gray-600">
-              Different tiles grant bonuses and challenges
+              Eri ruudut antavat bonuksia ja haasteita
             </p>
           </div>
           <div>
-            <p className="font-medium">Goal</p>
+            <p className="font-medium">Tavoite</p>
             <p className="text-sm text-gray-600">
-              Reach the diploma tile to complete your journey!
+              Saavuta diplomin ruutu ja valmistut!
             </p>
           </div>
         </div>

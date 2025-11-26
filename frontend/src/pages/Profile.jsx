@@ -4,9 +4,15 @@ import { useAuthStore } from '../stores/authStore';
 function Profile() {
   const { user } = useAuthStore();
 
+  const roleNames = {
+    STUDENT: 'Oppilas',
+    TEACHER: 'Opettaja',
+    ADMIN: 'Pääkäyttäjä'
+  };
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="mb-8">Profile</h1>
+      <h1 className="mb-8">Profiili</h1>
 
       <div className="card">
         <div className="flex items-center gap-6 mb-6">
@@ -14,7 +20,7 @@ function Profile() {
             {user?.profilePicture ? (
               <img
                 src={user.profilePicture}
-                alt="Profile"
+                alt="Profiilikuva"
                 className="w-24 h-24 rounded-full"
               />
             ) : (
@@ -28,14 +34,14 @@ function Profile() {
             <h2>{user?.name}</h2>
             <p className="text-gray-600">{user?.email}</p>
             <span className="inline-block mt-2 px-3 py-1 bg-primary-100 text-primary-800 rounded-md text-sm font-medium">
-              {user?.role}
+              {roleNames[user?.role] || user?.role}
             </span>
           </div>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium mb-2">Name</label>
+            <label className="block text-sm font-medium mb-2">Nimi</label>
             <input
               type="text"
               className="input"
@@ -45,7 +51,7 @@ function Profile() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2">Sähköposti</label>
             <input
               type="email"
               className="input"
@@ -57,7 +63,7 @@ function Profile() {
           {user?.studentProfile && (
             <>
               <div>
-                <label className="block text-sm font-medium mb-2">Grade Level</label>
+                <label className="block text-sm font-medium mb-2">Luokka-aste</label>
                 <input
                   type="number"
                   className="input"
@@ -67,7 +73,7 @@ function Profile() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">Reading Goal</label>
+                <label className="block text-sm font-medium mb-2">Lukutavoite</label>
                 <input
                   type="number"
                   className="input"

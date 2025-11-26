@@ -16,12 +16,10 @@ function TeacherDashboard() {
 
   const fetchTeacherData = async () => {
     try {
-      // In a real app, you'd fetch teacher's classes first
-      // For now, we'll show alerts
       const alertsRes = await api.get(`/teachers/${user.id}/alerts`);
       setAlerts(alertsRes.data.alerts);
     } catch (error) {
-      console.error('Error fetching teacher data:', error);
+      console.error('Virhe haettaessa opettajan tietoja:', error);
     } finally {
       setLoading(false);
     }
@@ -30,44 +28,43 @@ function TeacherDashboard() {
   const verifyLog = async (logId, verified) => {
     try {
       await api.post(`/teachers/${user.id}/verify-log`, { logId, verified });
-      // Refresh data
       if (selectedClass) {
         fetchClassOverview(selectedClass);
       }
     } catch (error) {
-      console.error('Error verifying log:', error);
+      console.error('Virhe vahvistettaessa kirjausta:', error);
     }
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-xl">Loading...</div>
+        <div className="text-xl">Ladataan...</div>
       </div>
     );
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="mb-8">Teacher Dashboard</h1>
+      <h1 className="mb-8">Opettajan työpöytä</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
         <div className="card">
-          <h3 className="text-gray-600 mb-2">Total Alerts</h3>
+          <h3 className="text-gray-600 mb-2">Hälytyksiä yhteensä</h3>
           <p className="text-3xl font-bold text-red-600">
             {alerts.length}
           </p>
         </div>
 
         <div className="card">
-          <h3 className="text-gray-600 mb-2">High Priority</h3>
+          <h3 className="text-gray-600 mb-2">Korkea prioriteetti</h3>
           <p className="text-3xl font-bold text-orange-600">
             {alerts.filter(a => a.severity === 'high').length}
           </p>
         </div>
 
         <div className="card">
-          <h3 className="text-gray-600 mb-2">Medium Priority</h3>
+          <h3 className="text-gray-600 mb-2">Keskitason prioriteetti</h3>
           <p className="text-3xl font-bold text-yellow-600">
             {alerts.filter(a => a.severity === 'medium').length}
           </p>
@@ -75,9 +72,9 @@ function TeacherDashboard() {
       </div>
 
       <div className="card mb-6">
-        <h2 className="mb-4">Student Alerts</h2>
+        <h2 className="mb-4">Oppilashälytykset</h2>
         {alerts.length === 0 ? (
-          <p className="text-gray-600">No alerts. All students are active!</p>
+          <p className="text-gray-600">Ei hälytyksiä. Kaikki oppilaat ovat aktiivisia!</p>
         ) : (
           <div className="space-y-3">
             {alerts.map((alert, index) => (
@@ -102,7 +99,8 @@ function TeacherDashboard() {
                         : 'bg-yellow-200 text-yellow-800'
                     }`}
                   >
-                    {alert.type}
+                    {alert.type === 'INACTIVE' ? 'PASSIIVINEN' :
+                     alert.type === 'LOW_ENGAGEMENT' ? 'VÄHÄN AKTIIVISUUTTA' : alert.type}
                   </span>
                 </div>
               </div>
@@ -112,13 +110,13 @@ function TeacherDashboard() {
       </div>
 
       <div className="card">
-        <h2 className="mb-4">Class Management</h2>
+        <h2 className="mb-4">Luokan hallinta</h2>
         <p className="text-gray-600">
-          Select a class to view detailed student progress and verify reading logs.
+          Valitse luokka nähdäksesi yksityiskohtaisen oppilaiden edistymisen ja vahvistaaksesi lukupäiväkirjat.
         </p>
         <div className="mt-4">
           <button className="btn btn-primary">
-            View Class Overview
+            Näytä luokan yhteenveto
           </button>
         </div>
       </div>

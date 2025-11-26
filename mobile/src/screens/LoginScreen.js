@@ -17,26 +17,26 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert('Error', 'Please enter email and password');
+      Alert.alert('Virhe', 'Syötä sähköposti ja salasana');
       return;
     }
 
     const result = await login(email, password);
 
     if (!result.success) {
-      Alert.alert('Login Failed', result.error);
+      Alert.alert('Kirjautuminen epäonnistui', result.error);
     }
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Lukudiplomi</Text>
-      <Text style={styles.subtitle}>Reading Diploma Game</Text>
+      <Text style={styles.subtitle}>Lukupeli</Text>
 
       <View style={styles.form}>
         <TextInput
           style={styles.input}
-          placeholder="Email"
+          placeholder="Sähköposti"
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
@@ -45,7 +45,7 @@ export default function LoginScreen() {
 
         <TextInput
           style={styles.input}
-          placeholder="Password"
+          placeholder="Salasana"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -59,12 +59,12 @@ export default function LoginScreen() {
           {loading ? (
             <ActivityIndicator color="#fff" />
           ) : (
-            <Text style={styles.buttonText}>Login</Text>
+            <Text style={styles.buttonText}>Kirjaudu sisään</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.oauthContainer}>
-          <Text style={styles.oauthText}>Or login with:</Text>
+          <Text style={styles.oauthText}>Tai kirjaudu:</Text>
           <View style={styles.oauthButtons}>
             <TouchableOpacity style={styles.oauthButton}>
               <Text style={styles.oauthButtonText}>Google</Text>

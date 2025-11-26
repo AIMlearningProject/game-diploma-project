@@ -4,12 +4,12 @@ import { View, Text, StyleSheet } from 'react-native';
 export default function GameScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Game Board</Text>
+      <Text style={styles.title}>Pelilauta</Text>
       <Text style={styles.subtitle}>
-        Board game visualization would be implemented here using React Native Canvas or WebView with Phaser
+        Pelilaudan visualisointi toteutettaisiin tässä käyttäen React Native Canvasia tai WebView-komponenttia Phaserin kanssa
       </Text>
       <Text style={styles.note}>
-        For full game experience, use the web version
+        Täyden pelikokemuksen saamiseksi käytä verkkoversion
       </Text>
     </View>
   );

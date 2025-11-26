@@ -32,7 +32,7 @@ export default function BookLogScreen() {
       const response = await api.get(`/books/search?q=${searchQuery}`);
       setBooks(response.data.books);
     } catch (error) {
-      Alert.alert('Error', 'Failed to search books');
+      Alert.alert('Virhe', 'Kirjojen haku epäonnistui');
     } finally {
       setLoading(false);
     }
@@ -40,17 +40,17 @@ export default function BookLogScreen() {
 
   const handleSubmit = async () => {
     if (!selectedBook) {
-      Alert.alert('Error', 'Please select a book');
+      Alert.alert('Virhe', 'Valitse kirja');
       return;
     }
 
     if (!pagesRead || parseInt(pagesRead) <= 0) {
-      Alert.alert('Error', 'Please enter valid pages read');
+      Alert.alert('Virhe', 'Syötä luettujen sivujen määrä');
       return;
     }
 
     if (reviewText.length < 20) {
-      Alert.alert('Error', 'Review must be at least 20 characters');
+      Alert.alert('Virhe', 'Arvostelu tulee olla vähintään 20 merkkiä');
       return;
     }
 
@@ -63,11 +63,11 @@ export default function BookLogScreen() {
         finishDate: new Date().toISOString(),
       });
 
-      Alert.alert('Success', 'Book logged successfully!', [
+      Alert.alert('Onnistui', 'Kirja kirjattu onnistuneesti!', [
         { text: 'OK', onPress: () => navigation.navigate('Dashboard') },
       ]);
     } catch (error) {
-      Alert.alert('Error', error.response?.data?.message || 'Failed to log book');
+      Alert.alert('Virhe', error.response?.data?.message || 'Kirjan kirjaus epäonnistui');
     } finally {
       setLoading(false);
     }
@@ -76,11 +76,11 @@ export default function BookLogScreen() {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Search for a Book</Text>
+        <Text style={styles.sectionTitle}>Etsi kirjaa</Text>
         <View style={styles.searchContainer}>
           <TextInput
             style={styles.input}
-            placeholder="Enter book title or author..."
+            placeholder="Kirjoita kirjan nimi tai kirjailija..."
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -89,7 +89,7 @@ export default function BookLogScreen() {
             onPress={searchBooks}
             disabled={loading}
           >
-            <Text style={styles.searchButtonText}>Search</Text>
+            <Text style={styles.searchButtonText}>Hae</Text>
           </TouchableOpacity>
         </View>
 
@@ -105,9 +105,9 @@ export default function BookLogScreen() {
                 onPress={() => setSelectedBook(book)}
               >
                 <Text style={styles.bookTitle}>{book.title}</Text>
-                <Text style={styles.bookAuthor}>by {book.author}</Text>
+                <Text style={styles.bookAuthor}>{book.author}</Text>
                 <Text style={styles.bookDetails}>
-                  {book.pages} pages • {book.genre}
+                  {book.pages} sivua • {book.genre}
                 </Text>
               </TouchableOpacity>
             ))}
@@ -117,32 +117,32 @@ export default function BookLogScreen() {
 
       {selectedBook && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Log Book</Text>
+          <Text style={styles.sectionTitle}>Kirjaa kirja</Text>
 
           <View style={styles.selectedBook}>
             <Text style={styles.selectedBookTitle}>{selectedBook.title}</Text>
-            <Text style={styles.selectedBookAuthor}>by {selectedBook.author}</Text>
+            <Text style={styles.selectedBookAuthor}>{selectedBook.author}</Text>
           </View>
 
-          <Text style={styles.label}>Pages Read (max {selectedBook.pages})</Text>
+          <Text style={styles.label}>Luetut sivut (max {selectedBook.pages})</Text>
           <TextInput
             style={styles.input}
             keyboardType="numeric"
             value={pagesRead}
             onChangeText={setPagesRead}
-            placeholder="Enter pages read"
+            placeholder="Syötä luetut sivut"
           />
 
-          <Text style={styles.label}>Review (minimum 20 characters)</Text>
+          <Text style={styles.label}>Arvostelu (vähintään 20 merkkiä)</Text>
           <TextInput
             style={[styles.input, styles.textArea]}
             multiline
             numberOfLines={4}
             value={reviewText}
             onChangeText={setReviewText}
-            placeholder="What did you think about this book?"
+            placeholder="Mitä pidit kirjasta?"
           />
-          <Text style={styles.charCount}>{reviewText.length} / 20 characters</Text>
+          <Text style={styles.charCount}>{reviewText.length} / 20 merkkiä</Text>
 
           <TouchableOpacity
             style={[
@@ -155,7 +155,7 @@ export default function BookLogScreen() {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.submitButtonText}>Log Book</Text>
+              <Text style={styles.submitButtonText}>Kirjaa kirja</Text>
             )}
           </TouchableOpacity>
         </View>

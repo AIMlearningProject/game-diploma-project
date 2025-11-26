@@ -22,16 +22,16 @@ function Navigation() {
 
             <div className="ml-10 flex space-x-4">
               <Link to="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100">
-                Dashboard
+                Etusivu
               </Link>
 
               {user?.role === 'STUDENT' && (
                 <>
                   <Link to="/game" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100">
-                    Play Game
+                    Pelaa
                   </Link>
                   <Link to="/log-book" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-100">
-                    Log Book
+                    Kirjaa kirja
                   </Link>
                 </>
               )}
@@ -43,13 +43,13 @@ function Navigation() {
               {user?.name}
             </span>
             <span className="px-2 py-1 bg-primary-100 text-primary-800 rounded-md text-xs font-medium">
-              {user?.role}
+              {user?.role === 'STUDENT' ? 'Oppilas' : user?.role === 'TEACHER' ? 'Opettaja' : 'Admin'}
             </span>
             <button
               onClick={handleLogout}
               className="btn btn-secondary text-sm"
             >
-              Logout
+              Kirjaudu ulos
             </button>
           </div>
         </div>

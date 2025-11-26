@@ -17,6 +17,12 @@ export default function ProfileScreen() {
     await logout();
   };
 
+  const roleNames = {
+    STUDENT: 'Oppilas',
+    TEACHER: 'Opettaja',
+    ADMIN: 'Pääkäyttäjä'
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
@@ -28,38 +34,38 @@ export default function ProfileScreen() {
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
         <View style={styles.roleBadge}>
-          <Text style={styles.roleText}>{user?.role}</Text>
+          <Text style={styles.roleText}>{roleNames[user?.role] || user?.role}</Text>
         </View>
       </View>
 
       <View style={styles.section}>
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Name</Text>
+          <Text style={styles.label}>Nimi</Text>
           <Text style={styles.value}>{user?.name}</Text>
         </View>
 
         <View style={styles.infoRow}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>Sähköposti</Text>
           <Text style={styles.value}>{user?.email}</Text>
         </View>
 
         {user?.studentProfile && (
           <>
             <View style={styles.infoRow}>
-              <Text style={styles.label}>Grade Level</Text>
+              <Text style={styles.label}>Luokka-aste</Text>
               <Text style={styles.value}>{user.studentProfile.gradeLevel}</Text>
             </View>
 
             <View style={styles.infoRow}>
-              <Text style={styles.label}>Reading Goal</Text>
-              <Text style={styles.value}>{user.studentProfile.readingGoal} books</Text>
+              <Text style={styles.label}>Lukutavoite</Text>
+              <Text style={styles.value}>{user.studentProfile.readingGoal} kirjaa</Text>
             </View>
           </>
         )}
       </View>
 
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-        <Text style={styles.logoutButtonText}>Logout</Text>
+        <Text style={styles.logoutButtonText}>Kirjaudu ulos</Text>
       </TouchableOpacity>
     </ScrollView>
   );

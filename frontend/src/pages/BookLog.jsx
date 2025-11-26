@@ -24,7 +24,7 @@ function BookLog() {
       const response = await api.get(`/books/search?q=${searchQuery}`);
       setBooks(response.data.books);
     } catch (err) {
-      setError('Failed to search books');
+      setError('Kirjojen haku epäonnistui');
     } finally {
       setLoading(false);
     }
@@ -35,12 +35,12 @@ function BookLog() {
     setError('');
 
     if (!selectedBook) {
-      setError('Please select a book');
+      setError('Valitse kirja');
       return;
     }
 
     if (!pagesRead || pagesRead <= 0) {
-      setError('Please enter valid pages read');
+      setError('Anna luettujen sivujen määrä');
       return;
     }
 
@@ -58,7 +58,7 @@ function BookLog() {
         navigate('/');
       }, 2000);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to log book');
+      setError(err.response?.data?.message || 'Kirjan kirjaus epäonnistui');
     } finally {
       setLoading(false);
     }
@@ -66,11 +66,11 @@ function BookLog() {
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="mb-8">Log a Book</h1>
+      <h1 className="mb-8">Kirjaa kirja</h1>
 
       {success && (
         <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          Book logged successfully! Redirecting...
+          Kirja kirjattu onnistuneesti! Ohjataan...
         </div>
       )}
 
@@ -81,12 +81,12 @@ function BookLog() {
       )}
 
       <div className="card mb-6">
-        <h2 className="mb-4">Search for a Book</h2>
+        <h2 className="mb-4">Etsi kirjaa</h2>
         <div className="flex gap-2">
           <input
             type="text"
             className="input flex-1"
-            placeholder="Enter book title or author..."
+            placeholder="Kirjoita kirjan nimi tai kirjailija..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && searchBooks()}
@@ -96,7 +96,7 @@ function BookLog() {
             className="btn btn-primary"
             disabled={loading}
           >
-            Search
+            Hae
           </button>
         </div>
 
@@ -113,9 +113,9 @@ function BookLog() {
                 }`}
               >
                 <p className="font-medium">{book.title}</p>
-                <p className="text-sm text-gray-600">by {book.author}</p>
+                <p className="text-sm text-gray-600">kirjoittanut {book.author}</p>
                 <p className="text-xs text-gray-500">
-                  {book.pages} pages • {book.genre} • Difficulty: {book.difficultyScore}
+                  {book.pages} sivua • {book.genre} • Vaikeustaso: {book.difficultyScore}
                 </p>
               </div>
             ))}
@@ -125,16 +125,16 @@ function BookLog() {
 
       {selectedBook && (
         <form onSubmit={handleSubmit} className="card">
-          <h2 className="mb-4">Book Details</h2>
+          <h2 className="mb-4">Kirjan tiedot</h2>
 
           <div className="mb-4">
             <p className="font-medium text-lg">{selectedBook.title}</p>
-            <p className="text-gray-600">by {selectedBook.author}</p>
+            <p className="text-gray-600">kirjoittanut {selectedBook.author}</p>
           </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
-              Pages Read (max {selectedBook.pages})
+              Luetut sivut (max {selectedBook.pages})
             </label>
             <input
               type="number"
@@ -149,7 +149,7 @@ function BookLog() {
 
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
-              Review (minimum 20 characters)
+              Arvostelu (vähintään 20 merkkiä)
             </label>
             <textarea
               className="input"
@@ -157,11 +157,11 @@ function BookLog() {
               value={reviewText}
               onChange={(e) => setReviewText(e.target.value)}
               minLength="20"
-              placeholder="What did you think about this book?"
+              placeholder="Mitä pidit kirjasta?"
               required
             />
             <p className="text-xs text-gray-500 mt-1">
-              {reviewText.length} / 20 characters
+              {reviewText.length} / 20 merkkiä
             </p>
           </div>
 
@@ -170,7 +170,7 @@ function BookLog() {
             className="btn btn-primary w-full"
             disabled={loading || reviewText.length < 20}
           >
-            {loading ? 'Submitting...' : 'Log Book'}
+            {loading ? 'Lähetetään...' : 'Kirjaa kirja'}
           </button>
         </form>
       )}

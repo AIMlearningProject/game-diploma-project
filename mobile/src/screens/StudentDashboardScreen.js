@@ -62,27 +62,27 @@ export default function StudentDashboardScreen() {
       }
     >
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>Welcome back, {user?.name}!</Text>
+        <Text style={styles.welcomeText}>Tervetuloa takaisin, {user?.name}!</Text>
       </View>
 
       <View style={styles.statsContainer}>
         <View style={styles.statCard}>
           <Text style={styles.statValue}>{gameState?.boardPosition || 0}</Text>
-          <Text style={styles.statLabel}>Position</Text>
+          <Text style={styles.statLabel}>Sijaintisi</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={[styles.statValue, { color: '#22c55e' }]}>
             {gameState?.streak || 0}
           </Text>
-          <Text style={styles.statLabel}>Streak</Text>
+          <Text style={styles.statLabel}>Putki</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={[styles.statValue, { color: '#8b5cf6' }]}>
             {gameState?.level || 1}
           </Text>
-          <Text style={styles.statLabel}>Level</Text>
+          <Text style={styles.statLabel}>Taso</Text>
         </View>
       </View>
 
@@ -91,7 +91,7 @@ export default function StudentDashboardScreen() {
           style={[styles.actionButton, styles.primaryButton]}
           onPress={() => navigation.navigate('Game')}
         >
-          <Text style={styles.actionButtonText}>Continue Playing</Text>
+          <Text style={styles.actionButtonText}>Jatka pelaamista</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -99,33 +99,33 @@ export default function StudentDashboardScreen() {
           onPress={() => navigation.navigate('LogBook')}
         >
           <Text style={[styles.actionButtonText, { color: '#374151' }]}>
-            Log a Book
+            Kirjaa kirja
           </Text>
         </TouchableOpacity>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Recent Books</Text>
+        <Text style={styles.sectionTitle}>Viimeisimmät kirjat</Text>
         {recentBooks.length === 0 ? (
-          <Text style={styles.emptyText}>No books logged yet</Text>
+          <Text style={styles.emptyText}>Ei vielä kirjattuja kirjoja</Text>
         ) : (
           recentBooks.map((log) => (
             <View key={log.id} style={styles.bookCard}>
               <View style={styles.bookInfo}>
                 <Text style={styles.bookTitle}>{log.book.title}</Text>
-                <Text style={styles.bookAuthor}>by {log.book.author}</Text>
-                <Text style={styles.bookPages}>{log.pagesRead} pages</Text>
+                <Text style={styles.bookAuthor}>{log.book.author}</Text>
+                <Text style={styles.bookPages}>{log.pagesRead} sivua</Text>
               </View>
               <View style={styles.bookRewards}>
-                <Text style={styles.rewardText}>+{log.stepsAwarded} steps</Text>
+                <Text style={styles.rewardText}>+{log.stepsAwarded} askelta</Text>
                 <Text style={styles.rewardText}>+{log.pointsAwarded} XP</Text>
                 {log.verifiedByTeacher ? (
                   <View style={styles.verifiedBadge}>
-                    <Text style={styles.verifiedText}>Verified</Text>
+                    <Text style={styles.verifiedText}>Vahvistettu</Text>
                   </View>
                 ) : (
                   <View style={styles.pendingBadge}>
-                    <Text style={styles.pendingText}>Pending</Text>
+                    <Text style={styles.pendingText}>Odottaa</Text>
                   </View>
                 )}
               </View>

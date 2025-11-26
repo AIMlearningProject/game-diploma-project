@@ -32,7 +32,7 @@ function Login() {
         setError(result.error);
       }
     } catch (err) {
-      setError('An unexpected error occurred');
+      setError('Odottamaton virhe tapahtui');
     } finally {
       setLoading(false);
     }
@@ -42,7 +42,7 @@ function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700">
       <div className="card max-w-md w-full">
         <h1 className="text-center mb-6">
-          {isLogin ? 'Login' : 'Register'}
+          {isLogin ? 'Kirjaudu sisään' : 'Rekisteröidy'}
         </h1>
 
         {error && (
@@ -54,36 +54,39 @@ function Login() {
         <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
             <div>
-              <label className="block text-sm font-medium mb-2">Name</label>
+              <label className="block text-sm font-medium mb-2">Nimi</label>
               <input
                 type="text"
                 className="input"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required={!isLogin}
+                placeholder="Etunimi Sukunimi"
               />
             </div>
           )}
 
           <div>
-            <label className="block text-sm font-medium mb-2">Email</label>
+            <label className="block text-sm font-medium mb-2">Sähköposti</label>
             <input
               type="email"
               className="input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder="oppilas@koulu.fi"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Password</label>
+            <label className="block text-sm font-medium mb-2">Salasana</label>
             <input
               type="password"
               className="input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder="Salasana"
             />
           </div>
 
@@ -92,7 +95,7 @@ function Login() {
             className="btn btn-primary w-full"
             disabled={loading}
           >
-            {loading ? 'Loading...' : isLogin ? 'Login' : 'Register'}
+            {loading ? 'Ladataan...' : isLogin ? 'Kirjaudu' : 'Rekisteröidy'}
           </button>
         </form>
 
@@ -101,12 +104,12 @@ function Login() {
             onClick={() => setIsLogin(!isLogin)}
             className="text-primary-600 hover:text-primary-700 text-sm"
           >
-            {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+            {isLogin ? 'Tarvitsetko tunnuksen? Rekisteröidy' : 'Onko sinulla jo tunnus? Kirjaudu'}
           </button>
         </div>
 
         <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 mb-2">Or login with:</p>
+          <p className="text-sm text-gray-600 mb-2">Tai kirjaudu:</p>
           <div className="flex gap-2 justify-center">
             <button className="btn btn-secondary flex-1">
               Google

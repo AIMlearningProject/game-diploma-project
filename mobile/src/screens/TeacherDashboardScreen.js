@@ -53,7 +53,7 @@ export default function TeacherDashboardScreen() {
       }
     >
       <View style={styles.header}>
-        <Text style={styles.welcomeText}>Teacher Dashboard</Text>
+        <Text style={styles.welcomeText}>Opettajan työpöytä</Text>
       </View>
 
       <View style={styles.statsContainer}>
@@ -61,28 +61,28 @@ export default function TeacherDashboardScreen() {
           <Text style={[styles.statValue, { color: '#ef4444' }]}>
             {alerts.length}
           </Text>
-          <Text style={styles.statLabel}>Total Alerts</Text>
+          <Text style={styles.statLabel}>Hälytyksiä yhteensä</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={[styles.statValue, { color: '#f97316' }]}>
             {alerts.filter(a => a.severity === 'high').length}
           </Text>
-          <Text style={styles.statLabel}>High Priority</Text>
+          <Text style={styles.statLabel}>Korkea prioriteetti</Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={[styles.statValue, { color: '#eab308' }]}>
             {alerts.filter(a => a.severity === 'medium').length}
           </Text>
-          <Text style={styles.statLabel}>Medium</Text>
+          <Text style={styles.statLabel}>Keskitaso</Text>
         </View>
       </View>
 
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Student Alerts</Text>
+        <Text style={styles.sectionTitle}>Oppilashälytykset</Text>
         {alerts.length === 0 ? (
-          <Text style={styles.emptyText}>No alerts. All students are active!</Text>
+          <Text style={styles.emptyText}>Ei hälytyksiä. Kaikki oppilaat ovat aktiivisia!</Text>
         ) : (
           alerts.map((alert, index) => (
             <View
@@ -107,7 +107,10 @@ export default function TeacherDashboardScreen() {
                     : styles.alertBadgeMedium,
                 ]}
               >
-                <Text style={styles.alertBadgeText}>{alert.type}</Text>
+                <Text style={styles.alertBadgeText}>
+                  {alert.type === 'INACTIVE' ? 'PASSIIVINEN' :
+                   alert.type === 'LOW_ENGAGEMENT' ? 'VÄHÄN AKTIIVISUUTTA' : alert.type}
+                </Text>
               </View>
             </View>
           ))
