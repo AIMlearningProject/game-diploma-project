@@ -205,7 +205,7 @@ Example:
 Students using this system:
 - Read 3-5x more books than before
 - Try new genres they wouldn't normally pick
-- Write better reviews (practice!)
+- Write better reviews (practice!!)
 - Maintain reading habits during breaks
 - Teachers spot struggling readers early
 - Classes form reading communities
