@@ -2,6 +2,192 @@ import prisma from '../services/prisma.js';
 import { requireRole } from '../middleware/auth.js';
 
 export default async function teacherRoutes(fastify, options) {
+  // Teacher dashboard
+  fastify.get('/dashboard', {
+    preHandler: requireRole(['TEACHER', 'ADMIN']),
+  }, async (request, reply) => {
+    const teacherId = request.user.id;
+
+    // Get all classes for this teacher
+    const classes = await prisma.class.findMany({
+      where: { teacherId },
+      include: {
+        students: {
+          include: {
+            student: {
+              include: {
+                gameState: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const totalStudents = classes.reduce((sum, c) => sum + c.students.length, 0);
+
+    // Get pending verifications
+    const studentIds = classes.flatMap(c => c.students.map(s => s.studentId));
+    const pendingLogs = await prisma.readingLog.count({
+      where: {
+        studentId: { in: studentIds },
+        verifiedByTeacher: false,
+      },
+    });
+
+    return {
+      classes: classes.map(c => ({
+        id: c.id,
+        name: c.name,
+        gradeLevel: c.gradeLevel,
+        studentCount: c.students.length,
+      })),
+      summary: {
+        totalClasses: classes.length,
+        totalStudents,
+        pendingVerifications: pendingLogs,
+      },
+    };
+  });
+
+  // Get pending verifications
+  fastify.get('/pending-verifications', {
+    preHandler: requireRole(['TEACHER', 'ADMIN']),
+  }, async (request, reply) => {
+    const teacherId = request.user.id;
+
+    // Get all students in teacher's classes
+    const classes = await prisma.class.findMany({
+      where: { teacherId },
+      select: { students: { select: { studentId: true } } },
+    });
+
+    const studentIds = classes.flatMap(c => c.students.map(s => s.studentId));
+
+    const pendingLogs = await prisma.readingLog.findMany({
+      where: {
+        studentId: { in: studentIds },
+        verifiedByTeacher: false,
+      },
+      include: {
+        book: true,
+        student: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 50,
+    });
+
+    return pendingLogs;
+  });
+
+  // Verify reading (alternative route)
+  fastify.post('/verify-reading/:logId', {
+    preHandler: requireRole(['TEACHER', 'ADMIN']),
+  }, async (request, reply) => {
+    const { logId } = request.params;
+    const { approved, feedback } = request.body;
+    const teacherId = request.user.id;
+
+    // Get log and verify teacher has access to this student
+    const log = await prisma.readingLog.findUnique({
+      where: { id: logId },
+      include: {
+        student: {
+          include: {
+            studentProfile: {
+              include: {
+                class: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!log) {
+      return reply.status(404).send({ error: 'Reading log not found' });
+    }
+
+    if (log.student.studentProfile.class.teacherId !== teacherId && request.user.role !== 'ADMIN') {
+      return reply.status(403).send({ error: 'Not authorized to verify this log' });
+    }
+
+    // Update log
+    const updatedLog = await prisma.readingLog.update({
+      where: { id: logId },
+      data: {
+        verifiedByTeacher: approved,
+        teacherVerifiedAt: approved ? new Date() : null,
+      },
+    });
+
+    // Create audit log
+    await prisma.auditLog.create({
+      data: {
+        actorId: teacherId,
+        action: approved ? 'VERIFY_READING_LOG' : 'REJECT_READING_LOG',
+        target: `ReadingLog:${logId}`,
+        metadataJson: JSON.stringify({
+          studentId: log.studentId,
+          bookId: log.bookId,
+          feedback,
+        }),
+      },
+    });
+
+    return updatedLog;
+  });
+
+  // Get class progress
+  fastify.get('/class/:classId/progress', {
+    preHandler: requireRole(['TEACHER', 'ADMIN']),
+  }, async (request, reply) => {
+    const { classId } = request.params;
+    const teacherId = request.user.id;
+
+    // Verify teacher owns this class
+    const teacherClass = await prisma.class.findFirst({
+      where: {
+        id: classId,
+        teacherId: request.user.role === 'ADMIN' ? undefined : teacherId,
+      },
+      include: {
+        students: {
+          include: {
+            student: {
+              include: {
+                gameState: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!teacherClass) {
+      return reply.status(404).send({ error: 'Class not found or not authorized' });
+    }
+
+    const students = teacherClass.students.map(s => ({
+      id: s.student.id,
+      name: s.student.name,
+      gameState: s.student.gameState,
+    }));
+
+    return {
+      class: {
+        id: teacherClass.id,
+        name: teacherClass.name,
+      },
+      students,
+    };
+  });
+
   // Get class overview
   fastify.get('/:id/class-overview', {
     preHandler: requireRole(['TEACHER', 'ADMIN']),

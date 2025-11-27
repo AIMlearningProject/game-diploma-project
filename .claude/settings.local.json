@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(test -f D:game-playbackendjest.config.js)",
+      "Bash(test:*)",
+      "Bash(npm install:*)",
+      "Bash(docker ps:*)",
+      "Bash(npm run test:*)",
+      "Bash(npx prisma generate:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
