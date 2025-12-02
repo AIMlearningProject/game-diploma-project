@@ -1,0 +1,59 @@
+# Dependencies
+node_modules/
+
+# Expo
+.expo/
+.expo-shared/
+dist/
+web-build/
+
+# Native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Metro
+.metro-health-check*
+
+# Debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macOS
+.DS_Store
+*.pem
+
+# Environment
+.env
+.env.local
+
+# IDE
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.project
+.settings/
+*.iml
+
+# Android
+android/app/build/
+android/app/release/
+android/.gradle/
+android/captures/
+android/local.properties
+
+# iOS
+ios/Pods/
+ios/build/
+ios/*.xcworkspace
+!ios/*.xcworkspace/contents.xcworkspacedata
+
+# Temporary files
+*.log
+*.tmp
