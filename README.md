@@ -29,9 +29,10 @@ A browser-based adaptive board game platform where students' reading activity dr
 
 ### Prerequisites
 - Node.js 18+
-- Docker Desktop
+- **Option A:** Docker Desktop (recommended)
+- **Option B:** PostgreSQL 14+ installed locally
 
-### Setup
+### Setup with Docker (Recommended)
 
 ```bash
 # 1. Start databases
@@ -51,14 +52,55 @@ npm install
 npm run dev
 ```
 
+### Setup WITHOUT Docker
+
+If you don't have Docker, install PostgreSQL locally:
+
+**Windows:** Download from https://www.postgresql.org/download/windows/
+**Mac:** `brew install postgresql && brew services start postgresql`
+**Linux:** `sudo apt-get install postgresql postgresql-contrib`
+
+```bash
+# 1. Create database and user
+# Open PostgreSQL command line (psql) or pgAdmin and run:
+psql -U postgres
+
+CREATE USER lukudiplomi WITH PASSWORD 'lukudiplomi_dev_password';
+CREATE DATABASE lukudiplomi OWNER lukudiplomi;
+GRANT ALL PRIVILEGES ON DATABASE lukudiplomi TO lukudiplomi;
+\q
+
+# 2. Verify backend/.env has DATABASE_URL
+# Should contain:
+# DATABASE_URL="postgresql://lukudiplomi:lukudiplomi_dev_password@localhost:5432/lukudiplomi?schema=public"
+
+# 3. Setup backend (MUST run from backend directory)
+cd backend
+npm install
+npx prisma generate
+npx prisma migrate dev
+npx prisma db seed
+npm run dev
+
+# 4. Setup frontend (another terminal)
+cd frontend
+npm install
+npm run dev
+```
+
 ### Open Browser
 
 Go to: **http://localhost:5173**
 
-**Test Accounts:**
-- Student: `student1@lukudiplomi.fi` / `student123`
-- Teacher: `maria.teacher@lukudiplomi.fi` / `teacher123`
-- Admin: `admin@lukudiplomi.fi` / `admin123`
+**Test Accounts (after seeding):**
+- **Admin:** `admin@lukudiplomi.fi` / `admin123`
+- **Teacher:** `maria.opettaja@lukudiplomi.fi` / `opettaja123`
+- **Students:** `oppilas1@lukudiplomi.fi` through `oppilas5@lukudiplomi.fi` / `oppilas123`
+
+### Screenshots
+
+Application interface:
+- `Screenshot_2.jpg` - Login screen ("Kirjaudu sisään")
 
 ## 📱 Android/iOS App
 
@@ -354,21 +396,119 @@ See **[docs/PERFORMANCE.md](./docs/PERFORMANCE.md)** for detailed benchmarks.
 
 ## 🔧 Troubleshooting
 
-**Database connection fails:**
+### ❌ Error: "Environment variable not found: DATABASE_URL"
+
+**This is the most common error!**
+
+**Causes:**
+1. Running Prisma commands from the wrong directory
+2. PostgreSQL not installed or not running
+3. Missing or incorrect `.env` file in backend directory
+
+**Solutions:**
+
+```bash
+# ✅ Step 1: Verify you're in the backend directory
+pwd  # Should show: /path/to/game-play/backend
+
+# If not in backend directory:
+cd backend
+
+# ✅ Step 2: Verify .env file exists with DATABASE_URL
+cat .env | grep DATABASE_URL
+# Should show: DATABASE_URL="postgresql://lukudiplomi:lukudiplomi_dev_password@localhost:5432/lukudiplomi?schema=public"
+
+# If missing, copy from .env.example:
+cp .env.example .env
+
+# ✅ Step 3: Check PostgreSQL is running
+
+# For Docker users:
+docker ps | grep postgres
+# Should show lukudiplomi-postgres container running
+
+# If not running:
+docker-compose up -d
+
+# For non-Docker users (Windows):
+# Check PostgreSQL service is running in Services app
+# Or run: net start postgresql-x64-14
+
+# For non-Docker users (Mac/Linux):
+psql -U postgres -c "SELECT version();"
+# Should show PostgreSQL version
+
+# ✅ Step 4: Test database connection
+npx prisma db push
+# If this works, your database connection is good!
+
+# ✅ Step 5: Now run the commands in order:
+npx prisma generate
+npx prisma migrate dev
+npx prisma db seed
+npm run dev
+```
+
+### ⚠️ Warning: Deprecated Prisma Config
+
+**Warning Message:** `The configuration property 'package.jsonPrisma' is deprecated`
+
+**Status:** This is just a future warning for Prisma 7. Your current setup with Prisma 6 works perfectly fine.
+
+**Action:** You can safely ignore this warning. No fix needed for now.
+
+### 🔴 Database connection fails
+
+**With Docker:**
 ```bash
 docker ps  # Check if postgres is running
 docker logs lukudiplomi-postgres
+docker-compose restart postgres
 ```
 
-**Frontend can't connect:**
+**Without Docker:**
+```bash
+# Windows: Check PostgreSQL service in Services app
+# Mac: brew services list | grep postgresql
+# Linux: sudo systemctl status postgresql
+
+# Test connection manually:
+psql -U lukudiplomi -d lukudiplomi -h localhost -p 5432
+# Password: lukudiplomi_dev_password
+```
+
+### 🌐 Frontend can't connect to backend
+
 - Ensure backend is running on port 3000
 - Check http://localhost:3000/health
+- Verify CORS_ORIGIN in backend/.env matches your frontend URL
+- Check browser console for detailed error messages
 
-**Reset everything:**
+### 🔄 Reset everything (Fresh Start)
+
+**With Docker:**
 ```bash
+# Stop and remove all containers and volumes
 docker-compose down -v
+
+# Start fresh
 docker-compose up -d
-cd backend && npx prisma migrate reset
+
+# Reset database
+cd backend
+npx prisma migrate reset
+```
+
+**Without Docker:**
+```bash
+# Drop and recreate database
+psql -U postgres -c "DROP DATABASE IF EXISTS lukudiplomi;"
+psql -U postgres -c "CREATE DATABASE lukudiplomi OWNER lukudiplomi;"
+
+# Reset and reseed
+cd backend
+npx prisma migrate deploy
+npx prisma db seed
 ```
 
 ## 📝 License

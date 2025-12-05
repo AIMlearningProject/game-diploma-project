@@ -58,3 +58,9 @@ prisma/migrations/*/migration.sql.backup
 
 # OS
 Thumbs.db
+
+# Archive folder
+archive/
+
+# Claude Code
+.claude/
