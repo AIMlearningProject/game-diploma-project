@@ -1,7 +1,5 @@
 This project is part of the AIMlearning project, which is co-funded by the European Union. The project will run from 1.2.2024 to 30.4.2027.
 
-This project is part of the AIMlearning project, which is co-funded by the European Union. The project will run from 1.2.2024 to 30.4.2027.
-
 # Lukudiplomi - Reading Diploma Game
 
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions)
@@ -102,22 +100,22 @@ Go to: **http://localhost:5173**
 ## 📸 Screenshots
 
 ### Login
-![Login Screen](docs/images/Screenshot_2.jpg)
+![Login Screen](Screenshot_2.jpg)
 *Finnish login interface with email/password and OAuth options*
 
 ### Student Interface
-![Game Board](docs/images/Screenshot_6.jpg)
+![Game Board](Screenshot_6.jpg)
 *Interactive game board (Lukumatkasi) showing student progress with different tile types*
 
-![Book Logging](docs/images/Screenshot_7.jpg)
+![Book Logging](Screenshot_7.jpg)
 *Book search and logging interface (Kirjaa kirja) - students can search and log books they've read*
 
 ### Teacher Dashboard
-![Teacher Dashboard](docs/images/Screenshot_8.jpg)
+![Teacher Dashboard](Screenshot_8.jpg)
 *Teacher's workspace (Opettajan työpöytä) showing student alerts and class overview*
 
 ### Admin Dashboard
-![Admin Dashboard](docs/images/Screenshot_9.jpg)
+![Admin Dashboard](Screenshot_9.jpg)
 *Admin interface for managing classes and creating reading challenges*
 
 ## 📱 Android/iOS App
