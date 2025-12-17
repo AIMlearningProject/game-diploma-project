@@ -3,13 +3,8 @@ This project is part of the AIMlearning project, which is co-funded by the Europ
 
 ## Project Demo Video
 
-You can watch the project demo video here:
 
-[![Project Demo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://github.com/AIMlearningProject/game-diploma-project/blob/main/Rec%200004.mp4)
-
-Or click the link directly:
-
-[Watch the demo video](https://github.com/AIMlearningProject/game-diploma-project/blob/main/Rec%200004.mp4)
+[Watch the demo video](https://github.com/AIMlearningProject/game-diploma-project/blob/main/Rec%200006.mp4)
 
 # Lukudiplomi - Reading Diploma Game
 
