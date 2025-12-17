@@ -1,5 +1,16 @@
 This project is part of the AIMlearning project, which is co-funded by the European Union. The project will run from 1.2.2024 to 30.4.2027.
 
+
+## Project Demo Video
+
+You can watch the project demo video here:
+
+[![Project Demo](https://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://github.com/AIMlearningProject/game-diploma-project/blob/main/Rec%200004.mp4)
+
+Or click the link directly:
+
+[Watch the demo video](https://github.com/AIMlearningProject/game-diploma-project/blob/main/Rec%200004.mp4)
+
 # Lukudiplomi - Reading Diploma Game
 
 ![CI/CD](https://img.shields.io/badge/CI%2FCD-GitHub%20Actions-2088FF?logo=github-actions)
