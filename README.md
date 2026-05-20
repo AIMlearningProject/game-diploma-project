@@ -12,7 +12,7 @@ This project is part of the AIMlearning project, which is co-funded by the Europ
 ![License](https://img.shields.io/badge/license-MIT-blue)
 
 
- ![Live Demo](https://lukudiplomi-cuok6r76h-aliipous-projects.vercel.app)
+ [Live Demo](https://lukudiplomi-cuok6r76h-aliipous-projects.vercel.app)
 
 A browser-based adaptive board game platform where students' reading activity drives game progression and teachers receive actionable monitoring tools.
 
