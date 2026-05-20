@@ -1,91 +1,26 @@
+// Demo-mode auth — no real backend needed. Name + grade stored in localStorage.
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import api from '../api/client';
 
 export const useAuthStore = create(
   persist(
-    (set, get) => ({
+    (set) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
 
-      login: async (email, password) => {
-        try {
-          const response = await api.post('/auth/login', { email, password });
-          const { user, token } = response.data;
-
-          set({
-            user,
-            token,
-            isAuthenticated: true,
-          });
-
-          return { success: true };
-        } catch (error) {
-          return {
-            success: false,
-            error: error.response?.data?.message || error.response?.data?.error || 'Login failed',
-          };
-        }
+      login(name, grade = 4, role = 'STUDENT') {
+        const user = { id: `demo-${Date.now()}`, name, grade: Number(grade), role };
+        set({ user, isAuthenticated: true });
+        return { success: true };
       },
 
-      register: async (userData) => {
-        try {
-          const response = await api.post('/auth/register', userData);
-          const { user, token } = response.data;
-
-          set({
-            user,
-            token,
-            isAuthenticated: true,
-          });
-
-          return { success: true };
-        } catch (error) {
-          return {
-            success: false,
-            error: error.response?.data?.message || error.response?.data?.error || 'Registration failed',
-          };
-        }
-      },
-
-      logout: async () => {
-        try {
-          await api.post('/auth/logout');
-        } catch (error) {
-          console.error('Logout error:', error);
-        } finally {
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-          });
-        }
-      },
-
-      fetchCurrentUser: async () => {
-        try {
-          const response = await api.get('/auth/me');
-          set({
-            user: response.data,
-            isAuthenticated: true,
-          });
-        } catch (error) {
-          set({
-            user: null,
-            token: null,
-            isAuthenticated: false,
-          });
-        }
+      logout() {
+        set({ user: null, isAuthenticated: false });
       },
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({
-        token: state.token,
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      partialize: (s) => ({ user: s.user, isAuthenticated: s.isAuthenticated }),
     }
   )
 );

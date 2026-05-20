@@ -1,181 +1,232 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/client';
-import { useAuthStore } from '../stores/authStore';
+import { useGameStore } from '../stores/gameStore';
+import { searchBooks, GENRES, DIFFICULTY_OPTIONS } from '../data/books';
 
-function BookLog() {
-  const { user } = useAuthStore();
+const MANUAL_TEMPLATE = { title: '', author: '', pages: '', genre: 'muu', difficulty: 1.2 };
+
+export default function BookLog() {
   const navigate = useNavigate();
+  const logBook  = useGameStore(s => s.logBook);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [books, setBooks] = useState([]);
-  const [selectedBook, setSelectedBook] = useState(null);
-  const [pagesRead, setPagesRead] = useState('');
-  const [reviewText, setReviewText] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [query,      setQuery]      = useState('');
+  const [results,    setResults]    = useState([]);
+  const [selected,   setSelected]   = useState(null);
+  const [manual,     setManual]     = useState(false);
+  const [manualBook, setManualBook] = useState(MANUAL_TEMPLATE);
+  const [pagesRead,  setPagesRead]  = useState('');
+  const [review,     setReview]     = useState('');
+  const [difficulty, setDifficulty] = useState(1.2);
+  const [submitted,  setSubmitted]  = useState(false);
+  const [reward,     setReward]     = useState(null);
 
-  const searchBooks = async () => {
-    if (!searchQuery.trim()) return;
-
-    try {
-      setLoading(true);
-      const response = await api.get(`/books/search?q=${searchQuery}`);
-      setBooks(response.data.books);
-    } catch (err) {
-      setError('Kirjojen haku epäonnistui');
-    } finally {
-      setLoading(false);
-    }
+  const handleSearch = (q) => {
+    setQuery(q);
+    setResults(q.trim() ? searchBooks(q) : []);
   };
 
-  const handleSubmit = async (e) => {
+  const pickBook = (book) => {
+    setSelected(book);
+    setDifficulty(book.difficulty);
+    setPagesRead(String(book.pages));
+    setManual(false);
+    setResults([]);
+    setQuery('');
+  };
+
+  const activeBook = manual
+    ? { ...manualBook, pages: Number(manualBook.pages) || 0, difficulty }
+    : selected
+    ? { ...selected, pages: Number(pagesRead) || selected.pages, difficulty }
+    : null;
+
+  const canSubmit = activeBook &&
+    String(activeBook.title).trim() &&
+    Number(pagesRead) > 0 &&
+    review.length >= 20;
+
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
-
-    if (!selectedBook) {
-      setError('Valitse kirja');
-      return;
-    }
-
-    if (!pagesRead || pagesRead <= 0) {
-      setError('Anna luettujen sivujen määrä');
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await api.post(`/students/${user.id}/log-book`, {
-        bookId: selectedBook.id,
-        pagesRead: parseInt(pagesRead),
-        reviewText,
-        finishDate: new Date().toISOString(),
-      });
-
-      setSuccess(true);
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-    } catch (err) {
-      setError(err.response?.data?.message || 'Kirjan kirjaus epäonnistui');
-    } finally {
-      setLoading(false);
-    }
+    if (!canSubmit) return;
+    const result = logBook({
+      title:  activeBook.title,
+      author: activeBook.author || 'Tuntematon',
+      pages:  Number(pagesRead),
+      genre:  activeBook.genre,
+      difficulty,
+    });
+    setReward(result);
+    setSubmitted(true);
   };
 
+  // ── Success screen ────────────────────────────────────────────────────────
+  if (submitted && reward) {
+    return (
+      <div className="max-w-lg mx-auto px-4 py-12 text-center">
+        <div className="card">
+          <div className="text-6xl mb-4">🎉</div>
+          <h1 className="mb-2 text-green-600">Kirja kirjattu!</h1>
+          <p className="text-gray-600 mb-6">Hienoa lukemista!</p>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="bg-green-50 rounded-xl p-4">
+              <div className="text-3xl font-bold text-green-600">+{reward.steps}</div>
+              <div className="text-sm text-gray-600">askelta</div>
+            </div>
+            <div className="bg-purple-50 rounded-xl p-4">
+              <div className="text-3xl font-bold text-purple-600">+{reward.xp}</div>
+              <div className="text-sm text-gray-600">XP-pistettä</div>
+            </div>
+          </div>
+
+          {reward.achievements?.length > 0 && (
+            <div className="mb-6">
+              <p className="font-semibold text-yellow-700 mb-3">🏅 Uudet saavutukset!</p>
+              {reward.achievements.map(a => (
+                <div key={a.id} className="flex items-center gap-3 bg-yellow-50 p-3 rounded-lg mb-2">
+                  <span className="text-2xl">{a.icon}</span>
+                  <div className="text-left">
+                    <p className="font-medium text-sm">{a.name}</p>
+                    <p className="text-xs text-gray-500">{a.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button onClick={() => navigate('/game')} className="btn btn-primary flex-1 py-3">
+              🎮 Katso liike!
+            </button>
+            <button onClick={() => navigate('/')} className="btn btn-secondary flex-1 py-3">
+              Etusivulle
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Main form ─────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="mb-8">Kirjaa kirja</h1>
+    <div className="max-w-2xl mx-auto px-4 py-8">
+      <h1 className="mb-2">Kirjaa kirja 📖</h1>
+      <p className="text-gray-500 mb-8 text-sm">Hae kirja tai lisää se käsin.</p>
 
-      {success && (
-        <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-          Kirja kirjattu onnistuneesti! Ohjataan...
-        </div>
-      )}
-
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-
-      <div className="card mb-6">
-        <h2 className="mb-4">Etsi kirjaa</h2>
-        <div className="flex gap-2">
+      {/* Search — shown only when nothing selected yet */}
+      {!selected && !manual && (
+        <div className="card mb-6">
+          <h2 className="mb-4">Valitse kirja</h2>
           <input
-            type="text"
-            className="input flex-1"
-            placeholder="Kirjoita kirjan nimi tai kirjailija..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => e.key === 'Enter' && searchBooks()}
+            className="input mb-3"
+            placeholder="Hae nimellä tai kirjailijalla..."
+            value={query}
+            onChange={e => handleSearch(e.target.value)}
+            autoFocus
           />
-          <button
-            onClick={searchBooks}
-            className="btn btn-primary"
-            disabled={loading}
-          >
-            Hae
+          {results.length > 0 && (
+            <div className="space-y-2 max-h-64 overflow-y-auto mb-2">
+              {results.map(b => (
+                <button key={b.id} onClick={() => pickBook(b)}
+                  className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-primary-400 hover:bg-primary-50 transition-colors">
+                  <p className="font-medium">{b.title}</p>
+                  <p className="text-sm text-gray-500">{b.author} · {b.pages} s · {b.genre}</p>
+                </button>
+              ))}
+            </div>
+          )}
+          {query && results.length === 0 && (
+            <p className="text-sm text-gray-500 mb-2">Ei tuloksia — lisää käsin!</p>
+          )}
+          <button onClick={() => { setManual(true); setManualBook(MANUAL_TEMPLATE); }}
+            className="btn btn-secondary w-full mt-2">
+            + Lisää kirja käsin
           </button>
         </div>
+      )}
 
-        {books.length > 0 && (
-          <div className="mt-4 space-y-2 max-h-64 overflow-y-auto">
-            {books.map((book) => (
-              <div
-                key={book.id}
-                onClick={() => setSelectedBook(book)}
-                className={`p-3 rounded border cursor-pointer transition-colors ${
-                  selectedBook?.id === book.id
-                    ? 'border-primary-500 bg-primary-50'
-                    : 'border-gray-200 hover:bg-gray-50'
-                }`}
-              >
-                <p className="font-medium">{book.title}</p>
-                <p className="text-sm text-gray-600">kirjoittanut {book.author}</p>
-                <p className="text-xs text-gray-500">
-                  {book.pages} sivua • {book.genre} • Vaikeustaso: {book.difficultyScore}
-                </p>
+      {/* Manual book form */}
+      {manual && (
+        <div className="card mb-6">
+          <h2 className="mb-4">Lisää kirja käsin</h2>
+          <div className="space-y-3">
+            <input className="input" placeholder="Kirjan nimi *" value={manualBook.title}
+              onChange={e => setManualBook(p => ({ ...p, title: e.target.value }))} />
+            <input className="input" placeholder="Kirjailija" value={manualBook.author}
+              onChange={e => setManualBook(p => ({ ...p, author: e.target.value }))} />
+            <input className="input" placeholder="Sivumäärä *" type="number" value={manualBook.pages}
+              onChange={e => setManualBook(p => ({ ...p, pages: e.target.value }))} />
+            <select className="input" value={manualBook.genre}
+              onChange={e => setManualBook(p => ({ ...p, genre: e.target.value }))}>
+              {GENRES.map(g => <option key={g} value={g}>{g}</option>)}
+            </select>
+          </div>
+          <button onClick={() => setManual(false)} className="btn btn-secondary mt-4 text-sm">
+            ← Takaisin hakuun
+          </button>
+        </div>
+      )}
+
+      {/* Details — shown after book is chosen */}
+      {(selected || manual) && (
+        <form onSubmit={handleSubmit} className="card space-y-5">
+          {selected && (
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="font-bold text-lg">{selected.title}</p>
+                <p className="text-gray-500 text-sm">{selected.author} · {selected.genre}</p>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <button type="button" onClick={() => { setSelected(null); setPagesRead(''); }}
+                className="text-sm text-gray-400 hover:text-gray-600">Vaihda</button>
+            </div>
+          )}
 
-      {selectedBook && (
-        <form onSubmit={handleSubmit} className="card">
-          <h2 className="mb-4">Kirjan tiedot</h2>
-
-          <div className="mb-4">
-            <p className="font-medium text-lg">{selectedBook.title}</p>
-            <p className="text-gray-600">kirjoittanut {selectedBook.author}</p>
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Luetut sivut (max {selectedBook.pages})
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Luetut sivut{selected ? ` (max ${selected.pages})` : ' *'}
             </label>
-            <input
-              type="number"
-              className="input"
-              value={pagesRead}
-              onChange={(e) => setPagesRead(e.target.value)}
-              max={selectedBook.pages}
-              min="1"
-              required
-            />
+            <input type="number" className="input" value={pagesRead}
+              onChange={e => setPagesRead(e.target.value)}
+              min="1" max={selected?.pages || 9999} required
+              placeholder="Kuinka monta sivua luit?" />
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Arvostelu (vähintään 20 merkkiä)
+          <div>
+            <label className="block text-sm font-medium mb-2">Vaikeustaso</label>
+            <div className="flex gap-2">
+              {DIFFICULTY_OPTIONS.map(opt => (
+                <button key={opt.value} type="button" onClick={() => setDifficulty(opt.value)}
+                  className={`flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-colors ${
+                    difficulty === opt.value
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Arvostelu ({review.length} / vähintään 20 merkkiä)
             </label>
-            <textarea
-              className="input"
-              rows="4"
-              value={reviewText}
-              onChange={(e) => setReviewText(e.target.value)}
-              minLength="20"
-              placeholder="Mitä pidit kirjasta?"
-              required
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {reviewText.length} / 20 merkkiä
-            </p>
+            <textarea className="input" rows={4} value={review}
+              onChange={e => setReview(e.target.value)} minLength={20}
+              placeholder="Mitä pidit kirjasta?" />
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary w-full"
-            disabled={loading || reviewText.length < 20}
-          >
-            {loading ? 'Lähetetään...' : 'Kirjaa kirja'}
+          {Number(pagesRead) > 0 && (
+            <div className="bg-green-50 rounded-lg p-3 text-sm text-green-800">
+              Noin <strong>+{Math.max(1, Math.floor(Number(pagesRead) / 10))}</strong> askelta odottaa sinua!
+            </div>
+          )}
+
+          <button type="submit" className="btn btn-primary w-full py-3 text-base" disabled={!canSubmit}>
+            📖 Kirjaa kirja!
           </button>
         </form>
       )}
     </div>
   );
 }
-
-export default BookLog;

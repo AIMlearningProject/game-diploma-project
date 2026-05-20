@@ -1,127 +1,86 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../stores/authStore';
+import { useGameStore } from '../stores/gameStore';
 
-function Login() {
-  const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
+const GRADES = [1,2,3,4,5,6,7,8,9];
+
+export default function Login() {
+  const [name, setName]   = useState('');
+  const [grade, setGrade] = useState(4);
   const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
 
-  const { login, register } = useAuthStore();
-  const navigate = useNavigate();
+  const { login }     = useAuthStore();
+  const { resetGame } = useGameStore();
+  const navigate      = useNavigate();
 
-  const handleSubmit = async (e) => {
+  const handleStart = (e) => {
     e.preventDefault();
-    setError('');
-    setLoading(true);
-
-    try {
-      let result;
-      if (isLogin) {
-        result = await login(email, password);
-      } else {
-        result = await register({ name, email, password, role: 'STUDENT' });
-      }
-
-      if (result.success) {
-        navigate('/');
-      } else {
-        setError(result.error);
-      }
-    } catch (err) {
-      setError('Odottamaton virhe tapahtui');
-    } finally {
-      setLoading(false);
-    }
+    if (!name.trim()) { setError('Anna nimesi ensin.'); return; }
+    resetGame();
+    login(name.trim(), grade);
+    navigate('/');
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700">
-      <div className="card max-w-md w-full">
-        <h1 className="text-center mb-6">
-          {isLogin ? 'Kirjaudu sisään' : 'Rekisteröidy'}
-        </h1>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-500 to-primary-700 p-4">
+      <div className="card max-w-md w-full text-center">
+        <div className="text-6xl mb-4">📚</div>
+        <h1 className="mb-2">Lukudiplomi</h1>
+        <p className="text-gray-600 mb-8 text-sm">
+          Lue kirjoja, kerää askelia ja saavuta diplomi!
+        </p>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          <div className="bg-red-100 text-red-700 px-4 py-3 rounded mb-4 text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium mb-2">Nimi</label>
-              <input
-                type="text"
-                className="input"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required={!isLogin}
-                placeholder="Etunimi Sukunimi"
-              />
-            </div>
-          )}
-
+        <form onSubmit={handleStart} className="space-y-5 text-left">
           <div>
-            <label className="block text-sm font-medium mb-2">Sähköposti</label>
+            <label className="block text-sm font-medium mb-1">Nimesi</label>
             <input
-              type="email"
               className="input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              placeholder="Etunimi Sukunimi"
+              value={name}
+              onChange={e => setName(e.target.value)}
+              autoFocus
               required
-              placeholder="oppilas@koulu.fi"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-2">Salasana</label>
-            <input
-              type="password"
+            <label className="block text-sm font-medium mb-1">Luokka-aste</label>
+            <select
               className="input"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              placeholder="Salasana"
-            />
+              value={grade}
+              onChange={e => setGrade(Number(e.target.value))}
+            >
+              {GRADES.map(g => (
+                <option key={g} value={g}>{g}. luokka</option>
+              ))}
+            </select>
           </div>
 
-          <button
-            type="submit"
-            className="btn btn-primary w-full"
-            disabled={loading}
-          >
-            {loading ? 'Ladataan...' : isLogin ? 'Kirjaudu' : 'Rekisteröidy'}
+          <button type="submit" className="btn btn-primary w-full text-lg py-3">
+            🚀 Aloita lukuseikkailu!
           </button>
         </form>
 
-        <div className="mt-4 text-center">
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-primary-600 hover:text-primary-700 text-sm"
-          >
-            {isLogin ? 'Tarvitsetko tunnuksen? Rekisteröidy' : 'Onko sinulla jo tunnus? Kirjaudu'}
-          </button>
-        </div>
-
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 mb-2">Tai kirjaudu:</p>
-          <div className="flex gap-2 justify-center">
-            <button className="btn btn-secondary flex-1">
-              Google
-            </button>
-            <button className="btn btn-secondary flex-1">
-              Microsoft
-            </button>
-          </div>
+        <div className="mt-8 grid grid-cols-3 gap-3 text-center">
+          {[
+            { icon: '📖', label: 'Kirjaa kirjoja' },
+            { icon: '🎲', label: 'Liiku laudalla' },
+            { icon: '🏆', label: 'Voita diplomi' },
+          ].map(({ icon, label }) => (
+            <div key={label} className="bg-primary-50 rounded-lg p-3">
+              <div className="text-2xl mb-1">{icon}</div>
+              <div className="text-xs text-primary-700 font-medium">{label}</div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 }
-
-export default Login;
